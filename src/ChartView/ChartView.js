@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useDebounce } from "@uidotdev/usehooks";
 import Container from "@mui/material/Container";
 import { Checkbox, Divider, IconButton, InputBase, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Paper } from "@mui/material";
 import List from "@mui/material/List";
@@ -46,20 +47,21 @@ const SignalItem = memo(({ signal, handleToggle, checkedItemsArray }) => (
 
 export default function ChartView(props) {
     const [signals, setSignals] = useState([]);
-    const [checked, setChecked] = useState([]);
+    const [checkedSignals, setCheckedSignals] = useState([]);
     const [searchText, setSearchText] = useState("");
+    const debouncedSearchText = useDebounce(searchText, 150);
 
     const filteredSignals = useMemo(() => {
-        return signals.filter(s => s.toLowerCase().includes(searchText.toLowerCase()));
-    }, [signals, searchText]);
+        return signals.filter(s => s.toLowerCase().includes(debouncedSearchText.toLowerCase()));
+    }, [signals, debouncedSearchText]);
 
     useEffect(() => {
         setSignals(Object.keys(DATASET[0].streams[0].values));
     }, [])
 
     const handleToggle = useCallback((value) => {
-        const currentIndex = checked.indexOf(value);
-        const newChecked = [...checked];
+        const currentIndex = checkedSignals.indexOf(value);
+        const newChecked = [...checkedSignals];
 
         if (currentIndex === -1) {
             newChecked.push(value);
@@ -67,8 +69,8 @@ export default function ChartView(props) {
             newChecked.splice(currentIndex, 1);
         }
 
-        setChecked(newChecked);
-    }, [checked]);
+        setCheckedSignals(newChecked);
+    }, [checkedSignals]);
 
     return (
         <Container maxWidth="xl" disableGutters
@@ -112,8 +114,8 @@ export default function ChartView(props) {
                         overflowY: "auto",
                         overflowX: "hidden"
                     }}>
-                        {signals.map(signal => (
-                            <SignalItem key={signal} signal={signal} handleToggle={handleToggle} checkedItemsArray={checked} />
+                        {filteredSignals.map(signal => (
+                            <SignalItem key={signal} signal={signal} handleToggle={handleToggle} checkedItemsArray={checkedSignals} />
                         ))}
                     </Box>
                 </List>
