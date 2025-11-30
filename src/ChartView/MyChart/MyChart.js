@@ -2,20 +2,24 @@ import Paper from "@mui/material/Paper";
 import { memo, useMemo } from "react";
 import { Line } from "react-chartjs-2";
 
-function MyChart({ dataset, sx: propsSx }) {
+function MyChart({ dataset, signals, sx: propsSx }) {
     const chartData = useMemo(() => {
         return {
             labels: dataset.map(el => el.timestamp),
-            datasets: [
-                {
-                    label: "CIN_Accel_Pedal_Value",
-                    data: dataset.map(el => el.streams[0].values["CIN_Accel_Pedal_Value"]),
-                    borderColor: "rgb(255, 99, 132)",
-                    backgroundColor: "rgba(255, 99, 132, 0.5)"
-                }
-            ]
+            datasets: signals.map((signal, index, array) => {
+                // Cool method for setting unique colors found online
+                const hue = (index * 360 / array.length) % 360;
+                const color = `hsl(${hue}, 70%, 50%)`;
+
+                return {
+                    label: signal,
+                    data: dataset.map(el => el.streams[0].values[signal]),
+                    borderColor: color,
+                    backgroundColor: color
+                };
+            })
         };
-    }, [dataset]);
+    }, [dataset, signals]);
 
     return (
         <Paper elevation={3} sx={{ ...propsSx }}>
@@ -36,11 +40,6 @@ function MyChart({ dataset, sx: propsSx }) {
                             font: {
                                 size: 24
                             }
-                        },
-                        decimation: {
-                            enabled: true,
-                            algorithm: "lttb",
-                            samples: 1000
                         }
                     },
                     scales: {

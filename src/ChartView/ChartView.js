@@ -15,15 +15,14 @@ import {
     LinearScale,
     Legend,
     Title,
-    Tooltip,
-    Decimation
+    Tooltip
 } from "chart.js";
 import MyChart from "./MyChart/MyChart";
 
 import rawDataset from "../data.json";
 const DATASET = rawDataset;
 
-ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Decimation, Legend, Tooltip, Title)
+ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Legend, Tooltip, Title)
 
 const SignalItem = memo(({ signal, handleToggle, checkedItemsArray }) => (
     <ListItem>
@@ -121,7 +120,7 @@ export default function ChartView(props) {
                 </List>
             </Paper>
 
-            <MyChart dataset={DATASET} sx={{
+            <MyChart dataset={DATASET} signals={checkedSignals} sx={{
                 width: "70%",
                 height: "fit-content",
                 px: 1,
