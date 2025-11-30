@@ -1,56 +1,48 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import Container from "@mui/material/Container";
 import { Checkbox, Divider, IconButton, InputBase, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Paper } from "@mui/material";
-import { faker } from "@faker-js/faker";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import Box from "@mui/material/Box";
+import {
+    Chart as ChartJS,
+    LineElement,
+    PointElement,
+    CategoryScale,
+    LinearScale,
+    Legend,
+    Title,
+    Tooltip,
+    Decimation
+} from "chart.js";
+import MyChart from "./MyChart/MyChart";
 
-/**
- * 
- * @param {Number} number The number of desired random signal names
- * @returns The object containing the id of a signal and its name
- *          or a list of such objects, when {@link number} is defined
- */
-function createRandomSignal(number) {
-    const prefix = "CAN.";
-    const newManufacturerName = () => faker.vehicle.manufacturer().replace(/\s/g, ""); // Remove whitespaces
+import rawDataset from "../data.json";
+const DATASET = rawDataset;
 
-    if (number) {
-        const signalNames = [];
+ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Decimation, Legend, Tooltip, Title)
 
-        for (let i = 0; i < number; i++) {
-            const signalName = `${prefix}${newManufacturerName()}`;
-
-            signalNames.push({ id: i, name: signalName });
-        }
-
-        return signalNames;
-    }
-    else {
-        const signalName = `${prefix}${newManufacturerName()}`;
-
-        return { id: 0, name: signalName };
-    }
-}
-
-// Taken from stackoverflow
-const shuffleArray = (array) => {
-    let currentIndex = array.length;
-
-    // While there remain elements to shuffle...
-    while (currentIndex !== 0) {
-
-        // Pick a remaining element...
-        let randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-
-        // And swap it with the current element.
-        [array[currentIndex], array[randomIndex]] = [
-            array[randomIndex], array[currentIndex]];
-    }
-}
+const SignalItem = memo(({ signal, handleToggle, checkedItemsArray }) => (
+    <ListItem>
+        <ListItemButton role={undefined} onClick={() => handleToggle(signal)}>
+            <ListItemIcon>
+                <Checkbox
+                    edge="start"
+                    checked={checkedItemsArray.includes(signal)}
+                    tabIndex={-1}
+                    disableRipple
+                />
+            </ListItemIcon>
+            <ListItemText id={signal} primary={signal} title={signal} sx={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
+            }} />
+        </ListItemButton>
+    </ListItem>
+));
 
 export default function ChartView(props) {
     const [signals, setSignals] = useState([]);
@@ -58,17 +50,14 @@ export default function ChartView(props) {
     const [searchText, setSearchText] = useState("");
 
     const filteredSignals = useMemo(() => {
-        return signals.filter(s => s.name.toLowerCase().includes(searchText.toLowerCase()));
+        return signals.filter(s => s.toLowerCase().includes(searchText.toLowerCase()));
     }, [signals, searchText]);
 
     useEffect(() => {
-        const generatedSignals = createRandomSignal(5);
-
-        shuffleArray(generatedSignals);
-        setSignals(generatedSignals);
+        setSignals(Object.keys(DATASET[0].streams[0].values));
     }, [])
 
-    const handleToggle = (value) => {
+    const handleToggle = useCallback((value) => {
         const currentIndex = checked.indexOf(value);
         const newChecked = [...checked];
 
@@ -79,19 +68,26 @@ export default function ChartView(props) {
         }
 
         setChecked(newChecked);
-    };
+    }, [checked]);
 
     return (
-        <Container sx={{
-            pt: 8
-        }}>
+        <Container maxWidth="xl" disableGutters
+            sx={{
+                pt: 8,
+                display: "flex",
+                justifyContent: "space-between"
+            }}>
             <Paper elevation={3}
                 sx={{
                     width: 400,
-                    height: 600,
-                    overflow: "auto"
+                    height: 600
                 }}>
                 <List
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        height: "100%"
+                    }}
                     subheader={
                         <ListSubheader>
                             Available signals
@@ -112,23 +108,23 @@ export default function ChartView(props) {
                         </IconButton>
                     </Paper>
                     <Divider sx={{ mt: 2 }} />
-                    {filteredSignals.map(signal => (
-                        <ListItem key={signal.id}>
-                            <ListItemButton role={undefined} onClick={() => handleToggle(signal.id)}>
-                                <ListItemIcon>
-                                    <Checkbox
-                                        edge="start"
-                                        checked={checked.includes(signal.id)}
-                                        tabIndex={-1}
-                                        disableRipple
-                                    />
-                                </ListItemIcon>
-                                <ListItemText id={signal.name} primary={signal.name} />
-                            </ListItemButton>
-                        </ListItem>
-                    ))}
+                    <Box sx={{
+                        overflowY: "auto",
+                        overflowX: "hidden"
+                    }}>
+                        {signals.map(signal => (
+                            <SignalItem key={signal} signal={signal} handleToggle={handleToggle} checkedItemsArray={checked} />
+                        ))}
+                    </Box>
                 </List>
             </Paper>
+
+            <MyChart dataset={DATASET} sx={{
+                width: "70%",
+                height: "fit-content",
+                px: 1,
+                pb: 2
+            }} />
         </Container>
     );
 }
