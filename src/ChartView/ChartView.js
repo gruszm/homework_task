@@ -35,11 +35,17 @@ const SignalItem = memo(({ signal, handleToggle, checkedItemsArray }) => (
                     disableRipple
                 />
             </ListItemIcon>
-            <ListItemText id={signal} primary={signal} title={signal} sx={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap"
-            }} />
+            <ListItemText id={signal} primary={signal} title={signal}
+                sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap"
+                }}
+                slotProps={{
+                    primary: {
+                        fontSize: { xs: "0.8rem", lg: "0.9rem", xl: "1rem" }
+                    }
+                }} />
         </ListItemButton>
     </ListItem>
 ));
@@ -72,16 +78,17 @@ export default function ChartView(props) {
     }, [checkedSignals]);
 
     return (
-        <Container maxWidth="xl" disableGutters
+        <Container maxWidth={false} disableGutters
             sx={{
                 pt: 8,
+                px: 4,
                 display: "flex",
-                justifyContent: "space-between"
+                justifyContent: "space-around"
             }}>
             <Paper elevation={3}
                 sx={{
-                    width: 400,
-                    height: 600
+                    width: { xs: 200, lg: 300, xl: 400 },
+                    height: { xs: 500, lg: 600, xl: 700 }
                 }}>
                 <List
                     sx={{
@@ -122,7 +129,7 @@ export default function ChartView(props) {
 
             <MyChart dataset={DATASET} signals={checkedSignals} sx={{
                 width: "70%",
-                height: "fit-content",
+                height: "auto",
                 px: 1,
                 pb: 2
             }} />
