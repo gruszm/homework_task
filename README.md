@@ -1,3 +1,7 @@
+# Day 4
+
+<img width="3071" height="1435" alt="image" src="https://github.com/user-attachments/assets/feba8c60-0e93-4195-a17a-a6b14466a736" />
+
 # Day 2 & 3
 
 * Imported the signals from the .json
@@ -26,4 +30,5 @@ _*Noticed issue: despite optimization, there is a noticable lag every time the `
 <img width="3199" height="1636" alt="image" src="https://github.com/user-attachments/assets/2e08e817-0470-4142-a1b2-6480ca820575" />
 
 <img width="3199" height="1636" alt="image" src="https://github.com/user-attachments/assets/ef10440b-9a56-4619-8010-9143e25a25d3" />
+
 
