@@ -4,9 +4,10 @@ import Container from "@mui/material/Container";
 import { Checkbox, Divider, IconButton, InputBase, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Paper } from "@mui/material";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
+import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import {
     Chart as ChartJS,
     LineElement,
@@ -18,11 +19,12 @@ import {
     Tooltip
 } from "chart.js";
 import MyChart from "./MyChart/MyChart";
+import zoomPlugin from "chartjs-plugin-zoom";
 
 import rawDataset from "../data.json";
 const DATASET = rawDataset;
 
-ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Legend, Tooltip, Title)
+ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Legend, Tooltip, Title, zoomPlugin);
 
 const SignalItem = memo(({ signal, handleToggle, checkedItemsArray }) => (
     <ListItem>
@@ -80,7 +82,7 @@ export default function ChartView(props) {
     return (
         <Container maxWidth={false} disableGutters
             sx={{
-                pt: 8,
+                pt: 6,
                 px: 4,
                 display: "flex",
                 justifyContent: "space-around"
@@ -115,6 +117,7 @@ export default function ChartView(props) {
                             <ClearIcon />
                         </IconButton>
                     </Paper>
+                    <Button variant="contained" sx={{ alignSelf: "flex-start", mt: 2, ml: 2 }} onClick={() => setCheckedSignals([])}>Deselect All</Button>
                     <Divider sx={{ mt: 2 }} />
                     <Box sx={{
                         overflowY: "auto",

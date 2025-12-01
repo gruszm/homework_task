@@ -1,5 +1,8 @@
 import Paper from "@mui/material/Paper";
-import { memo, useMemo } from "react";
+import Button from "@mui/material/Button"
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { memo, useMemo, useRef } from "react";
 import { Line } from "react-chartjs-2";
 
 const LIGHTER_GREEN = "#02ab1cff";
@@ -109,6 +112,14 @@ function pickAxis(signalData) {
 }
 
 function MyChart({ dataset, signals, sx: propsSx }) {
+    const chartRef = useRef(null);
+
+    const handleResetZoom = () => {
+        if (chartRef.current) {
+            chartRef.current.resetZoom();
+        }
+    };
+
     const chartData = useMemo(() => {
         return {
             labels: dataset.map(el => el.timestamp),
@@ -133,12 +144,17 @@ function MyChart({ dataset, signals, sx: propsSx }) {
     }, [dataset, signals]);
 
     return (
-        <Paper elevation={3} sx={{ ...propsSx }}>
+        <Paper elevation={3} sx={{
+            ...propsSx,
+            display: "flex",
+            flexDirection: "column"
+        }}>
             <Line
+                ref={chartRef}
                 options={{
                     responsive: true,
                     interaction: {
-                        mode: 'index',
+                        mode: "index",
                         intersect: false
                     },
                     aspectRatio: 1.6,
@@ -158,11 +174,37 @@ function MyChart({ dataset, signals, sx: propsSx }) {
                             }
                         },
                         tooltip: {
-                            position: 'nearest',
+                            position: "nearest",
                             callbacks: {
                                 title: function (context) {
                                     return `Timestamp: ${Number(context[0].label).toFixed(3)} s`;
                                 }
+                            }
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                    speed: 0.075
+                                },
+                                drag: {
+                                    enabled: true,
+                                    modifierKey: "ctrl",
+                                    borderWidth: 1
+                                },
+                                pinch: {
+                                    enabled: true
+                                }
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: "xy"
+                            },
+                            limits: {
+                                gridScale: { min: -10, max: 10 },
+                                ySmall: { min: -10, max: 10 },
+                                yMedium: { min: -100, max: 100 },
+                                yLarge: { min: -1000, max: 1000 }
                             }
                         }
                     },
@@ -189,6 +231,18 @@ function MyChart({ dataset, signals, sx: propsSx }) {
                 }}
                 data={chartData}
             />
+
+            <Stack direction="row" sx={{
+                justifyContent: "space-between",
+                alignItems: "flex-end"
+            }}>
+                <Stack direction="column">
+                    <Typography variant="caption" color="text.secondary">Tips:</Typography>
+                    <Typography variant="caption" color="text.secondary">Hold Ctrl to drag</Typography>
+                    <Typography variant="caption" color="text.secondary">Scroll or pinch to zoom</Typography>
+                </Stack>
+                <Button variant="contained" onClick={handleResetZoom} size="large">Reset</Button>
+            </Stack>
         </Paper>
     );
 }
