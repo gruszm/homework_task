@@ -10,7 +10,7 @@ const LIGHTER_GREEN = "#02ab1cff";
 const myScales = {
     // Dummy scale, created to add some padding and not color the grid red
     gridScale: {
-        min: 0,
+        min: -1,
         max: 10,
         display: true,
         type: "linear",
@@ -30,13 +30,13 @@ const myScales = {
         }
     },
     ySmall: {
-        min: 0,
+        min: -1,
         max: 10,
         display: "auto",
         type: "linear",
         title: {
             display: true,
-            text: "0-10",
+            // text: "0-10",
             font: {
                 size: 16,
                 weight: "bold"
@@ -55,13 +55,13 @@ const myScales = {
         }
     },
     yMedium: {
-        min: 10,
+        min: -10,
         max: 100,
         display: "auto",
         type: "linear",
         title: {
             display: true,
-            text: "10-100",
+            // text: "0-100",
             font: {
                 size: 16,
                 weight: "bold"
@@ -80,13 +80,13 @@ const myScales = {
         }
     },
     yLarge: {
-        min: 100,
+        min: -100,
         max: 1000,
         display: "auto",
         type: "linear",
         title: {
             display: true,
-            text: "100-1000",
+            // text: "0-1000",
             font: {
                 size: 16,
                 weight: "bold"
