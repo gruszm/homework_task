@@ -18,16 +18,10 @@ const myScales = {
         ticks: { // Disable the ticks, but keep the padding
             display: true,
             padding: 10,
-            callback: function () {
-                return "";
-            }
+            callback: () => ""
         },
-        grid: {
-            drawTicks: false
-        },
-        border: {
-            display: false
-        }
+        grid: { drawTicks: false },
+        border: { display: false }
     },
     ySmall: {
         min: -1,
@@ -50,10 +44,7 @@ const myScales = {
             color: "red",
             padding: 6
         },
-        border: {
-            color: "red",
-            dashOffset: 5
-        }
+        border: { color: "red" }
     },
     yMedium: {
         min: -10,
@@ -77,9 +68,7 @@ const myScales = {
             color: LIGHTER_GREEN,
             padding: 6
         },
-        border: {
-            color: LIGHTER_GREEN
-        }
+        border: { color: LIGHTER_GREEN }
     },
     yLarge: {
         min: -100,
@@ -103,9 +92,7 @@ const myScales = {
             color: "blue",
             padding: 6
         },
-        border: {
-            color: "blue"
-        }
+        border: { color: "blue" }
     },
 }
 
@@ -124,6 +111,8 @@ function pickAxis(signalData) {
 
 function MyChart({ dataset, signals, sx: propsSx }) {
     const chartRef = useRef(null);
+    const minTimestamp = dataset[0].timestamp;
+    const maxTimestamp = dataset[dataset.length - 1].timestamp;
 
     const handleResetZoom = () => {
         if (chartRef.current) {
@@ -133,13 +122,15 @@ function MyChart({ dataset, signals, sx: propsSx }) {
 
     const chartData = useMemo(() => {
         return {
-            labels: dataset.map(el => el.timestamp),
             datasets: signals.map((signal, index, array) => {
                 // Cool method for setting unique colors found online
                 const hue = (index * 360 / array.length) % 360;
                 const color = `hsl(${hue}, 70%, 50%)`;
-                const signalData = dataset.map(el => el.streams[0].values[signal]);
-                const axis = pickAxis(signalData);
+                const signalData = dataset.map(el => ({
+                    x: el.timestamp,
+                    y: el.streams[0].values[signal]
+                }));
+                const axis = pickAxis(signalData.map(data => data.y));
 
                 return {
                     label: signal,
@@ -174,21 +165,19 @@ function MyChart({ dataset, signals, sx: propsSx }) {
                         line: { tension: 0.3 }
                     },
                     plugins: {
-                        legend: {
-                            position: "top"
-                        },
+                        legend: { position: "top" },
                         title: {
                             display: true,
                             text: "Vehicle data",
-                            font: {
-                                size: 24
-                            }
+                            font: { size: 24 }
                         },
                         tooltip: {
                             position: "nearest",
                             callbacks: {
-                                title: function (context) {
-                                    return `Timestamp: ${Number(context[0].label).toFixed(3)} s`;
+                                title: (context) => `Timestamp: ${context[0].parsed.x.toFixed(3)} s`,
+                                label: (context) => {
+                                    // Set 3 decimal points and then trim the zeros
+                                    return `${context.dataset.label}: ${parseFloat(context.parsed.y.toFixed(3))}`;
                                 }
                             }
                         },
@@ -203,15 +192,14 @@ function MyChart({ dataset, signals, sx: propsSx }) {
                                     modifierKey: "ctrl",
                                     borderWidth: 1
                                 },
-                                pinch: {
-                                    enabled: true
-                                }
+                                pinch: { enabled: true }
                             },
                             pan: {
                                 enabled: true,
                                 mode: "xy"
                             },
                             limits: {
+                                x: { min: minTimestamp - 2, max: maxTimestamp + 2 }, // Add some room on the left and right
                                 gridScale: { min: -10, max: 10 },
                                 ySmall: { min: -10, max: 10 },
                                 yMedium: { min: -100, max: 100 },
@@ -221,6 +209,9 @@ function MyChart({ dataset, signals, sx: propsSx }) {
                     },
                     scales: {
                         x: {
+                            type: "linear",
+                            min: minTimestamp,
+                            max: maxTimestamp,
                             title: {
                                 display: true,
                                 text: "Timestamp [s]",
@@ -229,13 +220,7 @@ function MyChart({ dataset, signals, sx: propsSx }) {
                                     weight: "bold"
                                 }
                             },
-                            ticks: {
-                                callback: function (value, index, ticks) {
-                                    const label = this.getLabelForValue(value);
-
-                                    return Number(label).toFixed(3);
-                                }
-                            }
+                            ticks: { stepSize: 1 }
                         },
                         ...myScales
                     }
