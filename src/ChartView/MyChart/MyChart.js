@@ -35,7 +35,7 @@ const myScales = {
         display: "auto",
         type: "linear",
         title: {
-            display: true,
+            display: false,
             // text: "0-10",
             font: {
                 size: 16,
@@ -47,7 +47,8 @@ const myScales = {
             color: "red"
         },
         ticks: {
-            color: "red"
+            color: "red",
+            padding: 6
         },
         border: {
             color: "red",
@@ -60,7 +61,7 @@ const myScales = {
         display: "auto",
         type: "linear",
         title: {
-            display: true,
+            display: false,
             // text: "0-100",
             font: {
                 size: 16,
@@ -73,7 +74,8 @@ const myScales = {
             color: LIGHTER_GREEN,
         },
         ticks: {
-            color: LIGHTER_GREEN
+            color: LIGHTER_GREEN,
+            padding: 6
         },
         border: {
             color: LIGHTER_GREEN
@@ -85,7 +87,7 @@ const myScales = {
         display: "auto",
         type: "linear",
         title: {
-            display: true,
+            display: false,
             // text: "0-1000",
             font: {
                 size: 16,
@@ -94,17 +96,26 @@ const myScales = {
         },
         // position: "right",
         grid: {
-            drawOnChartArea: false
+            drawOnChartArea: false,
+            color: "blue",
+        },
+        ticks: {
+            color: "blue",
+            padding: 6
+        },
+        border: {
+            color: "blue"
         }
-    }
+    },
 }
 
 function pickAxis(signalData) {
+    const signalMin = Math.min(...signalData);
     const signalMax = Math.max(...signalData);
 
-    if (signalMax <= 10) {
+    if (signalMin >= -10 && signalMax <= 10) {
         return "ySmall";
-    } else if (signalMax <= 100) {
+    } else if (signalMin >= -100 && signalMax <= 100) {
         return "yMedium";
     } else {
         return "yLarge";
