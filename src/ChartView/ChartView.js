@@ -1,13 +1,13 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
 import Container from "@mui/material/Container";
-import { Checkbox, Divider, IconButton, InputBase, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Paper } from "@mui/material";
+import { Divider, IconButton, InputBase, ListSubheader, Paper } from "@mui/material";
 import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import SignalItem from "./SignalItem/SignalItem";
 import {
     Chart as ChartJS,
     LineElement,
@@ -18,39 +18,13 @@ import {
     Title,
     Tooltip
 } from "chart.js";
-import MyChart from "./MyChart/MyChart";
+import SignalChart from "./SignalChart/SignalChart";
 import zoomPlugin from "chartjs-plugin-zoom";
 
 import rawDataset from "../data.json";
 const DATASET = rawDataset;
 
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Legend, Tooltip, Title, zoomPlugin);
-
-const SignalItem = memo(({ signal, handleToggle, checkedItemsArray }) => (
-    <ListItem>
-        <ListItemButton role={undefined} onClick={() => handleToggle(signal)}>
-            <ListItemIcon>
-                <Checkbox
-                    edge="start"
-                    checked={checkedItemsArray.includes(signal)}
-                    tabIndex={-1}
-                    disableRipple
-                />
-            </ListItemIcon>
-            <ListItemText id={signal} primary={signal} title={signal}
-                sx={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap"
-                }}
-                slotProps={{
-                    primary: {
-                        fontSize: { xs: "0.8rem", lg: "0.9rem", xl: "1rem" }
-                    }
-                }} />
-        </ListItemButton>
-    </ListItem>
-));
 
 export default function ChartView(props) {
     const [signals, setSignals] = useState([]);
@@ -66,7 +40,19 @@ export default function ChartView(props) {
         setSignals(Object.keys(DATASET[0].streams[0].values));
     }, [])
 
-    const handleToggle = useCallback((value) => {
+    const handleTextChange = (e) => {
+        setSearchText(e.target.value);
+    };
+
+    const handleTextClearClick = () => {
+        setSearchText("");
+    };
+
+    const handleDeselectAllClick = () => {
+        setCheckedSignals([]);
+    }
+
+    const handleSignalItemClick = useCallback((value) => () => {
         const currentIndex = checkedSignals.indexOf(value);
         const newChecked = [...checkedSignals];
 
@@ -112,25 +98,25 @@ export default function ChartView(props) {
                         mt: 1
                     }}>
                         <SearchIcon sx={{ mr: 1 }} />
-                        <InputBase sx={{ flex: 1 }} value={searchText} onChange={(e) => setSearchText(e.target.value)} />
-                        <IconButton edge="end" onClick={() => setSearchText("")}>
+                        <InputBase sx={{ flex: 1 }} value={searchText} onChange={handleTextChange} />
+                        <IconButton edge="end" onClick={handleTextClearClick}>
                             <ClearIcon />
                         </IconButton>
                     </Paper>
-                    <Button variant="contained" sx={{ alignSelf: "flex-start", mt: 2, ml: 2 }} onClick={() => setCheckedSignals([])}>Deselect All</Button>
+                    <Button variant="contained" sx={{ alignSelf: "flex-start", mt: 2, ml: 2 }} onClick={handleDeselectAllClick}>Deselect All</Button>
                     <Divider sx={{ mt: 2 }} />
                     <Box sx={{
                         overflowY: "auto",
                         overflowX: "hidden"
                     }}>
                         {filteredSignals.map(signal => (
-                            <SignalItem key={signal} signal={signal} handleToggle={handleToggle} checkedItemsArray={checkedSignals} />
+                            <SignalItem key={signal} signal={signal} onClick={handleSignalItemClick} checkedItemsArray={checkedSignals} />
                         ))}
                     </Box>
                 </List>
             </Paper>
 
-            <MyChart dataset={DATASET} signals={checkedSignals} sx={{
+            <SignalChart dataset={DATASET} signals={checkedSignals} sx={{
                 width: "70%",
                 height: "auto",
                 px: 1,

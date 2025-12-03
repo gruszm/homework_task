@@ -4,117 +4,14 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { memo, useMemo, useRef } from "react";
 import { Line } from "react-chartjs-2";
+import { CustomScales, pickAxisForArray } from "./CustomScales";
 
-const LIGHTER_GREEN = "#02ab1cff";
-
-const myScales = {
-    // Dummy scale, created to add some padding and not color the grid red
-    gridScale: {
-        min: -1,
-        max: 10,
-        display: true,
-        type: "linear",
-        axis: "y",
-        ticks: { // Disable the ticks, but keep the padding
-            display: true,
-            padding: 10,
-            callback: () => ""
-        },
-        grid: { drawTicks: false },
-        border: { display: false }
-    },
-    ySmall: {
-        min: -1,
-        max: 10,
-        display: "auto",
-        type: "linear",
-        title: {
-            display: false,
-            // text: "0-10",
-            font: {
-                size: 16,
-                weight: "bold"
-            }
-        },
-        grid: {
-            drawOnChartArea: false,
-            color: "red"
-        },
-        ticks: {
-            color: "red",
-            padding: 6
-        },
-        border: { color: "red" }
-    },
-    yMedium: {
-        min: -10,
-        max: 100,
-        display: "auto",
-        type: "linear",
-        title: {
-            display: false,
-            // text: "0-100",
-            font: {
-                size: 16,
-                weight: "bold"
-            }
-        },
-        // position: "right",
-        grid: {
-            drawOnChartArea: false,
-            color: LIGHTER_GREEN,
-        },
-        ticks: {
-            color: LIGHTER_GREEN,
-            padding: 6
-        },
-        border: { color: LIGHTER_GREEN }
-    },
-    yLarge: {
-        min: -100,
-        max: 1000,
-        display: "auto",
-        type: "linear",
-        title: {
-            display: false,
-            // text: "0-1000",
-            font: {
-                size: 16,
-                weight: "bold"
-            }
-        },
-        // position: "right",
-        grid: {
-            drawOnChartArea: false,
-            color: "blue",
-        },
-        ticks: {
-            color: "blue",
-            padding: 6
-        },
-        border: { color: "blue" }
-    },
-}
-
-function pickAxis(signalData) {
-    const signalMin = Math.min(...signalData);
-    const signalMax = Math.max(...signalData);
-
-    if (signalMin >= -10 && signalMax <= 10) {
-        return "ySmall";
-    } else if (signalMin >= -100 && signalMax <= 100) {
-        return "yMedium";
-    } else {
-        return "yLarge";
-    }
-}
-
-function MyChart({ dataset, signals, sx: propsSx }) {
+function SignalChart({ dataset, signals, sx: propsSx }) {
     const chartRef = useRef(null);
     const minTimestamp = dataset[0].timestamp;
     const maxTimestamp = dataset[dataset.length - 1].timestamp;
 
-    const handleResetZoom = () => {
+    const handleResetClick = () => {
         if (chartRef.current) {
             chartRef.current.resetZoom();
         }
@@ -130,7 +27,7 @@ function MyChart({ dataset, signals, sx: propsSx }) {
                     x: el.timestamp,
                     y: el.streams[0].values[signal]
                 }));
-                const axis = pickAxis(signalData.map(data => data.y));
+                const axis = pickAxisForArray(signalData.map(data => data.y));
 
                 return {
                     label: signal,
@@ -222,7 +119,7 @@ function MyChart({ dataset, signals, sx: propsSx }) {
                             },
                             ticks: { stepSize: 1 }
                         },
-                        ...myScales
+                        ...CustomScales
                     }
                 }}
                 data={chartData}
@@ -237,10 +134,10 @@ function MyChart({ dataset, signals, sx: propsSx }) {
                     <Typography variant="caption" color="text.secondary">Hold Ctrl to drag</Typography>
                     <Typography variant="caption" color="text.secondary">Scroll or pinch to zoom</Typography>
                 </Stack>
-                <Button variant="contained" onClick={handleResetZoom} size="large">Reset</Button>
+                <Button variant="contained" onClick={handleResetClick} size="large">Reset</Button>
             </Stack>
         </Paper>
     );
 }
 
-export default memo(MyChart);
+export default memo(SignalChart);
